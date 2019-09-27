@@ -2,7 +2,7 @@ version: '3'
 services:
    nginx-proxy:
      build: ./nginx
-     image: 'cmyanko/sonatype_nginx-proxy:2.6.1'
+     image: 'cmyanko/iq_nginx-proxy_k8s:2.6.1'
      ports:
        - '443:443'
      command:
@@ -13,7 +13,7 @@ services:
        - iq-server
        
    iq-server:
-     image: 'cmyanko/my-iq-server:1.72.0'
+     image: 'cmyanko/iq-server-k8s:1.72.0'
      build: ./iq-server
      volumes:
        - 'iq-data:/sonatype-work'
