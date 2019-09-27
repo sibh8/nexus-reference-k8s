@@ -1,0 +1,35 @@
+version: '3'
+services:
+   nginx-proxy:
+     build: ./nginx
+     image: 'cmyanko/sonatype_nginx-proxy:2.6.1'
+     ports:
+       - '443:443'
+     command:
+       - nginx
+       - '-g'
+       - daemon off;
+     depends_on:
+       - iq-server
+       
+   iq-server:
+     image: 'cmyanko/my-iq-server:1.72.0'
+     build: ./iq-server
+     volumes:
+       - 'iq-data:/sonatype-work'
+       - 'iq-logs:/opt/sonatype/nexus-iq-server/log'
+     ports:
+       - '8070:8070'
+       - '8071:8071'
+     deploy:
+       replicas: 1
+       restart_policy:
+         condition: on-failure
+
+networks:
+  appsec:
+
+volumes:
+  iq-data:
+  iq-logs:
+
