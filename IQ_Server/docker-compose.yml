@@ -3,6 +3,8 @@ services:
    nginx-proxy:
      build: ./nginx
      image: 'cmyanko/iq_nginx-proxy_k8s:2.6.1'
+     networks:
+       - appsec
      ports:
        - '443:443'
      command:
@@ -15,6 +17,8 @@ services:
    iq-server:
      image: 'cmyanko/iq-server-k8s:1.72.0'
      build: ./iq-server
+     networks:
+       - appsec
      volumes:
        - 'iq-data:/sonatype-work'
        - 'iq-logs:/opt/sonatype/nexus-iq-server/log'
