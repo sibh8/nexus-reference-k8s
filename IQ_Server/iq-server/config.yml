@@ -204,6 +204,8 @@ logging:
         archivedLogFilenamePattern: ./log/audit-%d.log.gz
         # The number of archived audit log files to keep.
         archivedFileCount: 5
+      # Settings for logging to stdout.
+      - type: console
     "com.sonatype.insight.policy.violation":
       appenders:
         - type: file
@@ -217,6 +219,8 @@ logging:
           archivedLogFilenamePattern: ./log/policy-violation-%d.log.gz
           # The number of archived policy violation log files to keep.
           archivedFileCount: 5
+        # Settings for logging to stdout.
+        - type: console
 
   appenders:
   
