@@ -11,10 +11,17 @@ services:
      ports:
        - '8070:8070'
        - '8071:8071'
+     healthcheck:
+       test: ["CMD", "curl", "-f", "http://iq-server:8071/ping"]
+       interval: 1m30s
+       timeout: 10s
+       retries: 3
      deploy:
        replicas: 1
        restart_policy:
          condition: on-failure
+       labels:
+          com.sonatype.description: "Sonatype Nexus IQ Server"
 
 networks:
   appsec:

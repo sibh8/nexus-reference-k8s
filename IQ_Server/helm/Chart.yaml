@@ -1,7 +1,7 @@
-name: Sonatype Nexus IQ
-description: A simple deployment of Nexus IQ server with nginx as an ingress controller
+name: docker-compose
+description: A generated Helm Chart for docker-compose from Skippbox Kompose
 version: 0.0.1
 keywords:
-  - Sonatype Nexus IQ
+  - docker-compose
 sources:
 home:
