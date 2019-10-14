@@ -26,8 +26,14 @@ spec:
           image: {{ .Values.initContainers.image }}:{{ .Values.initContainers.tag }}
           volumeMounts:
           - name: license-data
-            mountPath: /etc/nexus-iq-server/license.lic
-            subPath: license.lic
+            mountPath: /data
+            command: 
+              - "/bin/sh"
+            args:
+              - "-c"
+              - "mv"
+              - "/etc/nexus-iq-server/license.lic"
+              - /data/license.lic
       {{- if (eq .Values.initContainers.registry.type "private") }}
       imagePullSecrets:
       - name: {{ .Values.initContainers.registry.secretName }}
@@ -61,8 +67,7 @@ spec:
             mountPath: /etc/nexus-iq-server/config.yml
             subPath: config.yaml
           - name: license-data
-            mountPath: /etc/nexus-iq-server/license.lic
-            subPath: license.lic
+            mountPath: /etc/nexus-iq-server
           #- name: iq-data
           #  mountPath: {{ .Values.sonatypeConfigs.sonatypeWork }}
           resources:
