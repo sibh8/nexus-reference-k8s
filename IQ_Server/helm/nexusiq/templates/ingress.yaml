@@ -1,0 +1,52 @@
+{{- if .Values.ingress.enabled -}}
+{{- $fullName := include "nexusiq.fullname" . -}}
+{{- if and (eq (.Capabilities.KubeVersion.Major|atoi) 1) (gt (.Capabilities.KubeVersion.Minor|atoi) 13) }}
+apiVersion: networking.k8s.io/v1beta1
+{{- else }}
+apiVersion: extensions/v1beta1
+{{- end }}
+kind: Ingress
+metadata:
+  name: {{ $fullName }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ template "nexusiq.name" . }}
+    chart: {{ template "nexusiq.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+{{- with .Values.ingress.annotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
+{{- end }}
+spec:
+{{- if .Values.ingress.tls }}
+  tls:
+  {{- range .Values.ingress.tls }}
+    - hosts:
+      {{- range .hosts }}
+        - {{ . }}
+      {{- end }}
+      secretName: {{ .secretName }}
+  {{- end }}
+{{- end }}
+  rules:
+    - host: {{ .Values.ingress.hostName }}
+      http:
+        paths:
+          {{- if .Values.sonatypeConfigs.server.applicationConnectors }}
+          {{- range $i, $appconn := .Values.sonatypeConfigs.server.applicationConnectors }}
+          - path: /
+            backend:
+              serviceName: {{ $fullName }}
+              servicePort: {{ $appconn.port }}
+          {{- end }}
+          {{- end }}
+          {{- if .Values.sonatypeConfigs.server.adminConnectors }}
+          {{- range $i, $adminconn := .Values.sonatypeConfigs.server.adminConnectors }}
+          - path: /admin
+            backend:
+              serviceName: {{ $fullName }}
+              servicePort: {{ $adminconn.port }}
+          {{- end }}
+          {{- end }}
+{{- end }}

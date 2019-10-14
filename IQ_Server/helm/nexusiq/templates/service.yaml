@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "nexusiq.fullname" . }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ template "nexusiq.name" . }}
+    chart: {{ template "nexusiq.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    {{- range $i, $appcoon := .Values.sonatypeConfigs.server.applicationConnectors }}
+    - port: {{ $appcoon.port }}
+      targetPort: {{ $appcoon.port }}
+      protocol: TCP
+      name: appconn-{{ $i }}
+    {{- end }}
+    {{- range $j, $adminconn := .Values.sonatypeConfigs.server.adminConnectors }}
+    - port: {{ $adminconn.port }}
+      targetPort: {{ $adminconn.port }}
+      protocol: TCP
+      name: adminconn-{{ $j }}
+    {{- end }}
+  selector:
+    app: {{ template "nexusiq.name" . }}
+    release: {{ .Release.Name }}

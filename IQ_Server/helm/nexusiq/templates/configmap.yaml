@@ -1,0 +1,20 @@
+{{- if .Values.sonatypeConfigs }}
+{{- $fullName := include "nexusiq.fullname" . -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $fullName }}
+  labels:
+    app: {{ template "nexusiq.name" . }}
+    chart: {{ template "nexusiq.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data: 
+  config.yaml: |
+    {{- if .Values.ingress.tls }}
+    baseUrl: https://{{.Values.ingress.hostName }} 
+    {{- else }}
+    baseUrl: http://{{.Values.ingress.hostName }}
+    {{- end }}
+{{ .Values.sonatypeConfigs | toYaml | indent 4 }} 
+{{- end }}

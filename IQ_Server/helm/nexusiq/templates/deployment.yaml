@@ -1,0 +1,91 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: {{ template "nexusiq.fullname" . }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ template "nexusiq.name" . }}
+    chart: {{ template "nexusiq.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ template "nexusiq.name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      namespace: {{ .Values.namespace }}
+      labels:
+        app: {{ template "nexusiq.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      initContainers:
+        - name: license-container
+          image: {{ .Values.initContainers.image }}:{{ .Values.initContainers.tag }}
+          volumeMounts:
+          - name: license-data
+            mountPath: /etc/nexus-iq-server/license.lic
+            subPath: license.lic
+      {{- if (eq .Values.initContainers.registry.type "private") }}
+      imagePullSecrets:
+      - name: {{ .Values.initContainers.registry.secretName }}
+      {{- end }}
+
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            {{- range $i, $appcoon := .Values.sonatypeConfigs.server.applicationConnectors }}
+            - name: app-port-{{ $i }}
+              containerPort: {{ $appcoon.port }}
+              protocol: TCP
+            {{- end }}
+            {{- range $j, $adminconn := .Values.sonatypeConfigs.server.adminConnectors }}
+            - name: admin-port-{{ $j }}
+              containerPort: {{ $adminconn.port }}
+              protocol: TCP
+            {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8070
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8070
+          volumeMounts: 
+          - name: {{ .Release.Name }}-config-volume
+            mountPath: /etc/nexus-iq-server/config.yml
+            subPath: config.yaml
+          - name: license-data
+            mountPath: /etc/nexus-iq-server/license.lic
+            subPath: license.lic
+          #- name: iq-data
+          #  mountPath: {{ .Values.sonatypeConfigs.sonatypeWork }}
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+    {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+      volumes:
+        - name: {{ .Release.Name }}-config-volume
+          configMap:
+            name: {{ .Release.Name }}
+        - name: license-data
+          emptyDir: {}
+        #- name: iq-data
+        #  hostPath:
+        #    path: /nexus-iq-data
+        #    type: DirectoryOrCreate
