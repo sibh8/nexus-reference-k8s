@@ -4,6 +4,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ $fullName }}
+  namespace: {{ .Values.namespace }}
   labels:
     app: {{ template "nexusiq.name" . }}
     chart: {{ template "nexusiq.chart" . }}
