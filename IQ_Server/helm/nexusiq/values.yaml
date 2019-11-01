@@ -19,7 +19,7 @@ sonatypeConfigs:
   # Directory for data files.
   sonatypeWork: /sonatype-work
 
-  # location of license file 
+  # location of license file
   licenseFile: /etc/nexus-iq-server/license.lic
 
   # Hour of the day(0-23) to schedule Policy Monitoring execution. The default is midnight.
@@ -75,10 +75,10 @@ sonatypeConfigs:
   # If enabled, ensure that the baseUrl configuration setting is also enabled and correct, because generated emails often contain links to the server.
   #mail:
 
-    # The host running the SMTP server to use. 
+    # The host running the SMTP server to use.
     #hostname: "127.0.0.1"
 
-    # The port at which the SMTP server listens on. 
+    # The port at which the SMTP server listens on.
     #port: 587
 
     # The address used as From for outgoing notification mails sent by the server.
@@ -89,10 +89,10 @@ sonatypeConfigs:
 
     # The password used to access the mail server.
     #password: "guest"
-    
+
     # Connect using SSL.
     #ssl: true
-    
+
     # Connect using TLS.
     #tls: true
 
@@ -208,7 +208,7 @@ sonatypeConfigs:
           - type: file
             # The file to which policy violations will be logged.
             currentLogFilename: ./log/policy-violation.log
-            # When the policy violation log file rotates, the archived policy violation log will be renamed to this 
+            # When the policy violation log file rotates, the archived policy violation log will be renamed to this
             # and gzipped. The %d is replaced with the previous day (yyyy-MM-dd). Custom rolling windows can be created
             # by passing a SimpleDateFormat-compatible format as an argument: "%d{yyyy-MM-dd-hh}".
             #
@@ -220,21 +220,21 @@ sonatypeConfigs:
           - type: console
 
     appenders:
-    
+
         # Settings for logging to stdout.
       - type: console
-      
+
         # Do not display log statements below this threshold to stdout.
         threshold: INFO
-        
+
         logFormat: "%d{'yyyy-MM-dd HH:mm:ss,SSSZ'} %level [%thread] %X{username} %logger - %msg%n"
-        
+
         # Settings for logging to a file.
       - type: file
 
         # Do not write log statements below this threshold to the file.
         threshold: ALL
-        
+
         logFormat: "%d{'yyyy-MM-dd HH:mm:ss,SSSZ'} %level [%thread] %X{username} %logger - %msg%n"
 
         # The file to which current statements will be logged.
@@ -265,16 +265,35 @@ sonatypeConfigs:
 initContainers:
   image: registry.gitlab.com/personal_spikes/docker-repository/nexus-iq-license
   tag: latest
-  registry: 
+  registry:
     type: private
     secretName: gitlab-secret
 
+# persistence:
+#   type: static
+#   # type: static, dynamic
+#   local:
+#     storageClass: ""
+#     annotations: {}
+#     accessMode: "ReadWriteOnce"
+#     size: "8Gi"
+#   # The realm where storage will be maintained, Possible values: local, cloud
+#   azure:
+#   # If storaheHost = cloud, specify this parameter: Possible values, azure, aws, gcp (Currently supported for azure)
+#     azureResourceGroup: "aks-rg"
+#     azureDiskName: "nexusiq-aks-persistence-volume"
+#     azureSubscriptionId: "2729dfbe-46bf-46a6-a4d6-6da87f7132ff"
+#   # The parameters azureResourceGroup, azureDiskName, azureSubscriptionId are required if the cloudType=azure and type=static
+
 ingress:
   enabled: true
-  annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
-  hostName: nexusiq.local
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+    kubernetes.io/ingress.class: hub-services-nginx
+    nginx.ingress.kubernetes.io/ssl-ciphers: HIGH:!SSLv2:!SSLv3:!DH:!RSA
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  # Update this to match the domain
+  hostName: nexusiq.sample.com
   tls: []
   #  - secretName: nexusiq-tls
   #    hosts:

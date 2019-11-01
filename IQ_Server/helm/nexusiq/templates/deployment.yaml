@@ -66,6 +66,10 @@ spec:
           - name: license-data
             mountPath: /etc/nexus-iq-server/license.lic
             subPath: license.lic
+          {{- if and .Values.persistence  }}  
+          - name: {{ .Release.Name }}-config-volume
+            mountPath: {{ .Values.sonatypeConfigs.sonatypeWork }}
+          {{- end }}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
     {{- with .Values.nodeSelector }}
@@ -86,3 +90,17 @@ spec:
             name: {{ .Release.Name }}
         - name: license-data
           emptyDir: {}
+        {{- if and .Values.persistence }}
+        - name: {{ .Release.Name }}-persist-volume
+          {{- if and .Values.persistence.type ( eq .Values.persistence.type "static")}}
+          {{- if and .Values.persistence.azure .Values.persistence.azure.azureResourceGroup .Values.persistence.azure.azureDiskName .Values.persistence.azure.azureSubscriptionId  }}
+          azureDisk:
+            kind: Managed
+            diskName: {{ .Values.persistence.azure.azureDiskName }}
+            diskURI: /subscriptions/{{ .Values.persistence.azure.azureSubscriptionId }}/resourceGroups/{{ .Values.persistence.azure.azureResourceGroup }}/providers/Microsoft.Compute/disks/{{ .Values.persistence.azure.azureDiskName}}
+          {{- else }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.existingClaim | default (include "nexusiq.fullname" .) }}
+          {{- end -}}
+          {{- end -}}
+          {{- end -}}
