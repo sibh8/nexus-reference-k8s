@@ -282,7 +282,7 @@ initContainers:
 #   # If storaheHost = cloud, specify this parameter: Possible values, azure, aws, gcp (Currently supported for azure)
 #     azureResourceGroup: "aks-rg"
 #     azureDiskName: "nexusiq-aks-persistence-volume"
-#     azureSubscriptionId: "2729dfbe-46bf-46a6-a4d6-6da87f7132ff"
+#     azureSubscriptionId: "xxxxxx-xxxxxx"
 #   # The parameters azureResourceGroup, azureDiskName, azureSubscriptionId are required if the cloudType=azure and type=static
 
 ingress:
